@@ -1,0 +1,14 @@
+steps:
+- name: gcr.io/cloud-builders/docker
+  args: [
+    'build',
+    '-t', 'gcr.io/fti-vision/ftid-api:${TAG_NAME}',
+    '-t', 'gcr.io/fti-vision/ftid-api:latest',
+    '-f', 'Dockerfile',
+    '.'
+    ]
+
+images: [
+  'gcr.io/fti-vision/ftid-api:${TAG_NAME}',
+  'gcr.io/fti-vision/ftid-api:latest'
+  ]

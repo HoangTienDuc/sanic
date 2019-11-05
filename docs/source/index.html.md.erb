@@ -1,0 +1,443 @@
+---
+title: FPT Vietnamese ID Card Recognition API Reference
+
+language_tabs: # must be one of https://git.io/vQNgJ
+  - shell: cURL
+  - python: Python
+
+toc_footers:
+  - <a href='https://dev.openfpt.vn'>Sign Up for a Developer Key</a>
+  - <a href='https://fpt.ai/vision-en/'>Demo Page</a>
+
+includes:
+  - errors
+
+search: true
+---
+
+# Giới thiệu
+
+Nội dung của tài liệu là hướng dẫn chính thức và chi tiết cho mọi người bao gồm các kĩ thuật viên, lập trình viên và cả người dùng phổ thông sử dụng hệ thống nhận dạng Chứng Minh Thư (CMT) và Căn Cước Công Dân (CCCD) của FPT.AI (gọi tắt là FVI). 
+
+Trong tài liệu này, để cho ngắn gọn, CMT sẽ được dùng để chỉ chung CMT loại cũ và CCCD.
+
+Văn bản bao gồm:  
+
+* Giới thiệu về hệ thống FVI: tính năng, tốc độ và độ chính xác  
+* Các quy định về ảnh đầu vào CMT hoặc CCCD của API  
+* Các chi tiết cụ thể về cách sử dụng và tính năng của API  
+
+Ngoài ra, văn bản còn cung cấp một số ví dụ về cách sử dụng API viết bằng cURL và Python.
+
+<%= image_tag "images/hiep3_blur.png" %>
+
+# Hệ thống FVI
+
+## Tính năng
+
+Chức năng chính của hệ thống FVI là nhận dạng và trích dẫn thông tin từ CMT loại cũ hoặc CCCD của Việt Nam.  
+
+Hiện tại, khách hàng có thể gửi ảnh CMT hoặc CCCD đến hệ thống FVI, và hệ thống sẽ trả lại các thông tin trích dẫn từ CMT hoặc CCCD ví dụ: số CMT, tên, ngày tháng năm sinh, địa chỉ, giới tính, tôn giáo, ...  
+
+Để giúp khách hàng đánh giá được mức độ tin cậy của hệ thống, đi kèm với kết quả trích xuất là probability (theo %) của mỗi trường thông tin.  
+
+## Tốc độ xử lý
+
+Tốc độ xử lí của hệ thống FVI phụ thuộc vào độ phân giải của bức ảnh khách hàng gửi lên.  
+
+Tốc độ trung bình xử lí như sau  
+
+* Server không có GPU là 4-5 giây / bức ảnh  
+* Server có GPU (*NVIDIA Geforce GTX 1080Ti*) là 0.5-1 giây/ bức ảnh, xử lý được khối lượng 5 ảnh mỗi giây  
+
+## Độ chính xác
+
+Độ chính xác của hệ thống FVI cho tổng thể các trường thông tin là trên **90%** với ảnh đầu vào đáp ứng đủ các tiêu chí.  
+
+Độ chính xác cho từng trường thông tin cụ thể như sau:
+
+* Trên **98%** cho số CMT, ngày tháng năm sinh, dân tộc và ngày hết hạn (trên CCCD)  
+* Trên **95%** cho trường thông tin tên  
+* Trên **90%** cho trường thông tin địa chỉ
+
+# Các quy định về ảnh đầu vào  
+
+## Các quy định  
+
+* Ảnh đầu vào phải đủ 4 góc rõ ràng hoặc đủ các bộ phận chính của một CMT như ảnh, quốc huy, tiêu đề.
+* Các trường thông tin phải rõ ràng, so sánh khi mắt người có thể đọc được dễ dàng, không tẩy xoá, hay bị nhoè nước
+* Ảnh đầu vào không vượt quá **5 MB** và độ phân giải tối thiểu khoảng **640x480** để đảm bảo tỉ lệ đọc chính xác 
+* Tỉ lệ diện tích Chứng minh thư hoặc Căn cước công dân phải chiếm tối thiểu ¼ tổng diện tích ảnh trở lên  
+
+## Một số ví dụ
+
+* Ảnh đủ tiêu chuẩn
+
+<%= image_tag "images/good.png" %>
+
+<%= image_tag "images/cccd.jpg" %>
+
+* Ảnh chất lượng thấp và mất góc
+
+<%= image_tag "images/error1.png" %>
+
+* Ảnh chất lượng thấp và mất thông tin  
+
+<%= image_tag "images/error2.png" %>
+
+# Hướng dẫn sử dụng API
+
+## Authentication
+
+> Để authorize, có thể dùng code như sau:
+
+```python
+import requests
+
+API_ENDPOINT = "https://api.openfpt.vn/cmt"
+
+auth = {'api_key': 'xxxxxxx'}
+
+r = requests.post(API_ENDPOINT, files=/path/to/image/file, headers=auth)
+```
+
+```shell
+# Truyền api_key vào header với cURL command  
+curl -X POST 
+  https://api.openfpt.vn/cmt
+  -H "api_key: xxxxxxx"
+```
+
+> Thay cụm "xxxxxxx" bằng API key đã tạo.
+
+Hiện tại hệ thống FVI đã được hết nối với FPT Gateways, do đó đế có thể sử dụng, khách hàng cần tạo 1 account trên [developer portal](https://dev.openfpt.vn) và sau đó tạo một API key để có thể gửi request tới gateway (mặc định mỗi API key tạo mới chỉ có thể gửi 50 requests). 
+
+API key cần phải được nhúng trong header của tất cả API requests như dưới đây:
+
+`api_key: xxxxxxx`
+
+<aside class="notice">
+Khách hàng cần thay cụm <code>xxxxxxx</code> bằng API key đã tạo.
+</aside>
+
+## Nhận dạng CMT/CCCD từ file image form-data
+
+```python
+import requests
+
+API_ENDPOINT = "https://api.openfpt.vn/cmt"
+
+auth = {'api_key': 'xxxxxxx'}
+file = {'image': open(/path/to/image/file, 'rb')}
+
+r = requests.post(API_ENDPOINT, files=file, headers=auth)
+```
+
+```shell
+# Truyền api_key vào header với cURL command  
+curl -X POST 
+  https://api.openfpt.vn/cmt
+  -H "api_key: xxxxxxx"
+  -F image=@/path/to/image/file
+```
+> Thay cụm "xxxxxxx" bằng API key đã tạo.
+
+Đây là phương pháp sử dụng hệ thống bằng cách gửi ảnh CMT dạng form-data tới API endpoint. Khách hàng cần đặt key **image** cho file ảnh trong body của request.
+
+Hướng dẫn gửi request bằng phần mềm **POSTMAN** như sau:
+
+**Header**
+
+<%= image_tag "images/postman/header.png" %>
+
+**Body**
+
+<%= image_tag "images/postman/body.png" %>
+
+## Nhận dạng CMT/CCCD từ URL
+
+```python
+import requests
+
+API_ENDPOINT = "https://api.openfpt.vn/cmt"
+
+payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; 
+           name=\"image_url\"\r\n\r\nlink/to/image\r\n
+           ------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+auth = {
+    'content-type': "multipart/form-data; 
+                     boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+    'api_key': "xxxxxxx"}
+
+response = requests.request("POST", API_ENDPOINT, data=payload, headers=auth)
+```
+
+```shell
+# Truyền api_key vào header với cURL command  
+curl -X POST 
+  https://api.openfpt.vn/cmt
+  -H "api_key: xxxxxxx"
+  -F "image_url=/link/to/image"
+```
+> Thay cụm "xxxxxxx" bằng API key đã tạo.
+
+Đây là phương pháp sử dụng hệ thống bằng cách gửi một đường link ảnh CMT tới API endpoint. Khách hàng cần đặt key **image_url** cho đường link trong body của request.
+
+Hướng dẫn gửi request bằng phần mềm **POSTMAN** như sau:
+
+**Body**
+
+<%= image_tag "images/postman/body_url.png" %>
+
+## Nhận dạng CMT/CCCD từ string base64
+
+```python
+import requests
+
+API_ENDPOINT = "https://api.openfpt.vn/cmt"
+
+payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; 
+           name=\"image_base64\"\r\n\r\nstring/base64/of/image/goes/here\r\n
+           ------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+auth = {
+    'content-type': "multipart/form-data; 
+                     boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+    'api_key': "xxxxxxx"}
+
+response = requests.request("POST", API_ENDPOINT, data=payload, headers=auth)
+```
+
+```shell
+# Truyền api_key vào header với cURL command  
+curl -X POST 
+  https://api.openfpt.vn/cmt
+  -H "api_key: xxxxxxx"
+  -F "image_base64=/string/base64/of/image"
+```
+> Thay cụm "xxxxxxx" bằng API key đã tạo.
+
+Đây là phương pháp sử dụng hệ thống bằng cách gửi ảnh CMT dưới dạng string base64 tới API endpoint. Khách hàng cần đặt key **image_base64** cho string base64 trong body của request.
+
+Hướng dẫn gửi request bằng phần mềm **POSTMAN** như sau:
+
+**Body**
+
+<%= image_tag "images/postman/body_base64.png" %>
+
+## Trích xuất CMT/CCCD và nhận diện khuôn mặt trên ảnh
+
+```python
+import requests
+
+API_ENDPOINT = "https://api.openfpt.vn/cmt"
+
+payload = "------WebKitFormBoundary7MA4YWxkTrZu0gW\r\nContent-Disposition: form-data; 
+           name=\"image\"; 
+           filename=\"/path/to/image/file\"\r\nContent-Type: 
+           image/jpeg\r\n\r\n\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW\r\n
+           Content-Disposition: form-data; 
+           name=\"face\"\r\n\r\n1\r\n------WebKitFormBoundary7MA4YWxkTrZu0gW--"
+
+auth = {
+    'content-type': "multipart/form-data; 
+                     boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW",
+    'api_key': "xxxxxxx"}
+
+response = requests.request("POST", API_ENDPOINT, data=payload, headers=auth)
+```
+
+```shell
+# Truyền api_key vào header với cURL command  
+curl -X POST 
+  https://api.openfpt.vn/cmt
+  -H "api_key: xxxxxxx"
+  -F image=@/path/to/image/file
+  -F face=1
+```
+
+> Thay cụm "xxxxxxx" bằng API key đã tạo.
+
+Đây là một chức năng của hệ thống **FVI** nhằm trích xuất ảnh cropped của CMT và ảnh mặt người có trên CMT dựa vào các thuật toán *Object Detection* và *Face Recognition*. 
+
+Để sử dụng chức năng này, ngoài các key thông thường như **image**, **image_url** và **image_base64** như mô tả ở trên, khách hàng cần đặt thêm key **face** với giá trị bằng **1** trong body của request.
+
+Sau khi gửi request thành công, trong kết quả trả về sẽ có thêm **cropped_idcard** và **face** là các đường link tới ảnh cropped của CMT và ảnh mặt người (xem hình bên dưới). Vì vấn đề bảo mật, các đường link này sẽ chỉ tồn tại trong vòng **5 phút** kể từ khi trả về kết quả.
+
+Hướng dẫn gửi request bằng phần mềm **POSTMAN** như sau:
+
+**Body**
+
+<%= image_tag "images/postman/body_face.png" %>
+
+Minh họa kết quả trả về của ảnh cropped và ảnh face:
+
+**Ảnh gốc**
+
+<%= image_tag "images/face/maxresdefault.jpg" %>
+
+**Ảnh cropped**
+
+<%= image_tag "images/face/cropped.jpg" %>
+
+**Ảnh face**
+
+<%= image_tag "images/face/face.jpg" %>
+
+# API Responses 
+
+Hệ thống **FVI** có khả năng trích xuất tất cả các loại thông tin có trên các loại CMT cũ/mới hoặc CCCD của Việt Nam (phần thông tin về đặc điểm nhận dạng ở mặt sau chỉ được trả về nếu có yêu cầu riêng từ khách hàng). Hệ thống phân chia kết quả trả về thành 4 loại: **CMT cũ mặt trước/sau** và **CCCD mặt trước/sau** (CMT loại mới được xếp cùng loại với CCCD).
+
+> API Response
+
+```javascript
+{   
+    "errorCode" : x, 
+    "errorMessage" : "xxxx",   
+    "data" : [xxxx] 
+} 
+```
+
+Sau khi gửi request thành công, hệ thống sẽ trả về một **file json** bao gồm thông tin dạng text trên CMT sử dụng format như ở bên.
+
+  * **errorCode**: giá trị bằng **0** nếu request thành công không có lỗi xảy ra
+  * **errorMessage**: giá trị bằng **string rỗng** nếu request thành công không có lỗi xảy ra
+  * **data**: bao gồm các trường thông tin có trên ảnh CMT nếu request thành công không có lỗi xảy ra, trả về **list rỗng []** nếu xảy ra lỗi (những trường thông tin không có sẽ có giá trị **"N/A"**). Ngoài ra, đi kèm với các trường thông tin là chỉ số **probability** cho biết mức độ đáng tin cậy của kết quả trả về.
+
+(Chi tiết các lỗi có thể xảy ra bao gồm cả **errorCode** và **errorMessage** xem ở phần [**Errors**](#errors)) 
+
+## Mặt trước CMT loại cũ
+
+> API Response
+
+```javascript
+{
+  "errorCode" : 0, 
+  "errorMessage" : "",
+  "data": [
+    {   
+      "id": "xxxx", 
+      "id_prob": "xxxx", 
+      "name": "xxxx", 
+      "name_prob": "xxxx", 
+      "dob": "xxxx", 
+      "dob_prob": "xxxx", 
+      "sex": "N/A", 
+      "sex_prob": "N/A", 
+      "nationality": "N/A", 
+      "nationality_prob": "N/A", 
+      "home": "xxxx", 
+      "home_prob": "xxxx", 
+      "address": "xxxx", 
+      "address_prob": "xxxx", 
+      "doe": "N/A", 
+      "doe_prob": "N/A" 
+    } 
+  ]
+}
+```
+
+Mặt trước CMT loại cũ bao gồm 5 trường thông tin gồm:
+
+  * Số CMT **id**
+  * Tên **name**
+  * Ngày sinh **dob**
+  * Nguyên quán **home** 
+  * Địa chỉ **address**
+
+## Mặt sau CMT loại cũ
+
+> API Response
+
+```javascript
+{
+  "errorCode" : 0, 
+  "errorMessage" : "",
+  "data": [
+    {   
+      "religion_prob": "xxxx", 
+      "religion": "xxxx", 
+      "ethnicity_prob": "xxxx", 
+      "ethnicity": "xxxx", 
+      "issue_date": "xxxx", 
+      "issue_date_prob": "xxxx",              
+      "issue_loc_prob": "xxxx", 
+      "issue_loc": "xxxx"
+    } 
+  ]
+}
+```
+
+Mặt sau CMT loại cũ bao gồm 4 trường thông tin gồm:
+
+  * Dân tộc **ethnicity**
+  * Tôn giáo **religion**
+  * Ngày cấp **issue_date**
+  * Nơi cấp **issue_loc**
+
+##  Mặt trước CCCD
+
+> API Response
+
+```javascript
+{
+  "errorCode" : 0, 
+  "errorMessage" : "",
+  "data": [
+    {   
+      "id": "xxxx", 
+      "id_prob": "xxxx", 
+      "name": "xxxx", 
+      "name_prob": "xxxx", 
+      "dob": "xxxx", 
+      "dob_prob": "xxxx", 
+      "sex": "xxxx", 
+      "sex_prob": "xxxx", 
+      "nationality": "xxxx", 
+      "nationality_prob": "xxxx", 
+      "home": "xxxx", 
+      "home_prob": "xxxx", 
+      "address": "xxxx", 
+      "address_prob": "xxxx", 
+      "doe": "xxxx", 
+      "doe_prob": "xxxx" 
+    } 
+  ]
+}
+```
+
+Ngoài các trường thông tin giống như mặt trước của CMT loại cũ, mặt trước CCCD có thêm 3 trường thông tin: 
+
+  * Giới tính **sex**
+  * Quốc tịch **nationality**
+  * Ngày hết hạn **doe**
+
+Ở CMT loại mới thì *quốc tịch* **nationality** được thay bằng *dân tộc* **enthnicity**
+
+## Mặt sau CCCD
+
+> API Response
+
+```javascript
+{
+  "errorCode" : 0, 
+  "errorMessage" : "",
+  "data": [
+    {   
+      "religion_prob": "N/A", 
+      "religion": "N/A", 
+      "ethnicity_prob": "N/A", 
+      "ethnicity": "N/A", 
+      "issue_date": "xxxx", 
+      "issue_date_prob": "xxxx",              
+      "issue_loc_prob": "N/A", 
+      "issue_loc": "N/A"
+    } 
+  ]
+}
+```
+
+Mặt sau CCCD chỉ bao gồm 1 trường thông tin:
+
+  * Ngày cấp **issue_date**
+
+

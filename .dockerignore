@@ -1,0 +1,20 @@
+# Common
+venv*
+.git*
+*.log
+
+# Config
+.env
+
+# Models
+export
+
+# Images
+*.jpg
+*.JPG
+*.png
+*.PNG
+*.jpeg
+
+# Resources
+resources/images

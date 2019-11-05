@@ -1,0 +1,24 @@
+version: '2.3'
+services:
+  serving:
+    image: "tensorflow/serving:latest-devel"
+    volumes:
+      - ${FTI_IDCARD_EXPORT_PATH:-./export}:/share/export:z
+      - ${FTI_IDCARD_SERVING_CONFIG:-./resources/configs/tensorflow}:/share/config:z
+    ports:
+      - "${FTI_IDCARD_SERVING_PORT:-8500}:8500"
+    command: ["tensorflow_model_server", "--model_config_file=/share/config/serving.config", "--enable_model_warmup=true", "--enable_batching=true"]
+  api:
+    image: "hiepph/ftid_api:${FTI_IDCARD_TAG:-latest}"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/code:z
+    environment:
+      - FTI_IDCARD_WORKERS=${FTI_IDCARD_WORKERS:-8}
+      - FTI_IDCARD_PORT=${FTI_IDCARD_PORT:-5000}
+      - FTI_IDCARD_SERVING_HOST=${FTI_IDCARD_SERVING_HOST:-serving:8500}
+      - HOST_NAME=${HOSTNAME:-hostname}
+    ports:
+      - "${FTI_IDCARD_PORT:-5000}:5000"

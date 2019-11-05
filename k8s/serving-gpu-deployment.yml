@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: serving
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: serving
+    spec:
+      containers:
+        - image: gcr.io/fti-vision/ftid-serving-gpu:0.0.1
+          imagePullPolicy: IfNotPresent
+          name: serving
+          ports:
+            - containerPort: 8500
+          volumeMounts:
+            - name: export-models
+              mountPath: /share
+          resources:
+            requests:
+              cpu: "8"
+              memory: "4Gi"
+          computeResourceRequests: ["nvidia-gpu"]
+      computeResources:
+        - name: "nvidia-gpu"
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          affinity:
+            required:
+              - key: "nvidia.com/gpu-memory"
+                operator: "Gt"
+                values: ["11000"]
+      # TODO: Remove this ###########
+      nodeSelector:
+        kubernetes.io/hostname: fti02
+      ################################
+      volumes:
+        - name: export-models
+          flexVolume:
+            driver: ceph.rook.io/rook
+            fsType: ceph
+            options:
+              fsName: fti-ceph-fs
+              clusterNamespace: rook-ceph
+              path: /vision/share

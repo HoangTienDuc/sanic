@@ -1,0 +1,147 @@
+import argparse
+import glob
+import sys
+import os
+import math
+import unicodedata
+
+import numpy as np
+import tensorflow as tf
+from PIL import Image, ImageOps
+from tqdm import tqdm
+
+from dataset import get_config
+import utils
+
+
+## Get ENV config
+PREFIX = 'READER_'
+TRANSFORM = os.getenv(PREFIX + 'TRANSFORM') or 'pad'
+
+
+def encode_utf8_string(text, length, charset):
+    null_char_id = len(charset) - 1
+
+    char_ids_padded = [null_char_id] * length
+    char_ids_unpadded = [null_char_id] * len(text)
+    for i, c in enumerate(list(text)):
+        try:
+            hash_id = charset[c]
+        except KeyError:
+            print('>>> ERROR: No {} in dictionary'.format(c))
+            return None, None
+        char_ids_padded[i] = hash_id
+        char_ids_unpadded[i] = hash_id
+
+    return char_ids_padded, char_ids_unpadded
+
+
+def _bytes_feature(value):
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
+
+
+def _int64_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=value))
+
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    # required parameters
+    parser.add_argument('--class_name', type=str, required=True)
+    parser.add_argument('--images-dir', type=str, required=True)
+    parser.add_argument('--annotation-file', type=str, required=True)
+    parser.add_argument('--output', type=str, required=True)
+
+    # config parameters
+    parser.add_argument('--charset-file', type=str, default='data/charset_size.txt')
+    args = parser.parse_args()
+
+    # Read charset dictionary
+    charset = {}
+    with open(args.charset_file) as dict_file:
+        for line in dict_file:
+            k, v = line[:-1].split('\t')
+            charset[v] = int(k)
+
+    # Read labels
+    img2label = {}
+    with open(args.annotation_file) as f:
+        for line in f:
+            try:
+                img_name, label = line.strip().split('\t')
+            except ValueError as e:
+                print("ERROR line:", line)
+                continue
+
+            img2label[img_name] = label.strip()
+
+    # Read dataset config
+    config = get_config(args.class_name)
+
+    tfrecord_writer = tf.python_io.TFRecordWriter(args.output)
+    for img_name in tqdm(os.listdir(args.images_dir)):
+        img_path = os.path.join(args.images_dir, img_name)
+
+        try:
+            img = Image.open(img_path)
+        except OSError:
+            print("ERROR image:", img_path)
+
+        height, width, channel = config['image_shape']
+
+        if TRANSFORM == 'pad':
+            new_img = utils.pad_image_keep_ratio(img, width, height)
+        elif TRANSFORM == 'resize':
+            new_img = utils.resize_image(img, width, height)
+
+        if new_img == None:
+            continue
+
+        if channel == 1:
+            # Grayscale
+            new_img = new_img.convert('L')
+
+        # Get size
+        new_w, new_h = new_img.size
+
+        try:
+            assert new_w == width
+        except AssertionError:
+            print('new width: {}, expected width: {}'.format(new_w, width))
+
+        # Maybe img_name not in images_dir
+        if img_name not in img2label:
+            continue
+
+        text = img2label[img_name]
+        # Force uppercase
+        text = text.upper()
+        # Normalize to NFC
+        text = unicodedata.normalize('NFC', text)
+        # Strange label
+        if len(text) > int(config['max_sequence_length']):
+            continue
+
+        char_ids_padded, char_ids_unpadded = encode_utf8_string(
+            text=text,
+            charset=charset,
+            length=config['max_sequence_length'])
+
+        if char_ids_padded is None:
+            continue
+
+        example = tf.train.Example(features=tf.train.Features(
+            feature={
+                'image/encoded': _bytes_feature(new_img.tobytes()),
+                'image/format': _bytes_feature(b"raw"),
+                'image/width': _int64_feature([new_w]),
+                'image/orig_width': _int64_feature([new_w]),
+                'image/class': _int64_feature(char_ids_padded),
+                'image/unpadded_class': _int64_feature(char_ids_unpadded),
+                'image/text': _bytes_feature(bytes(text, 'utf-8')),
+                }
+        ))
+        tfrecord_writer.write(example.SerializeToString())
+
+    tfrecord_writer.close()
+    sys.stdout.flush()

@@ -1,0 +1,209 @@
+Hà Nội,01,11
+HN,01,11
+H Nội,01,11
+HNội,01,11
+TP.Hồ Chí Minh,02 
+TP Hồ Chí Minh,02
+TP HồChíMinh,02
+Hồ Chí Minh,02
+TP HCM,02
+HCM,02 
+An Giang,35
+A Giang,35 
+AGiang,35 
+Bà Rịa - Vũng Tàu,27
+Bà Rịa Vũng Tàu,27
+Vũng Tàu,27
+BRVT,27
+Bà Rịa VTàu,27
+Bà Rịa V Tàu,27 
+Bắc Cạn,09 
+Bắc Kạn,09
+B Kạn,09
+BKạn,09
+Bắc Giang,12
+B Giang,12 
+BGiang,12 
+Bạc Liêu,38
+B Liêu,38 
+BLiêu,38 
+Bắc Ninh,12 
+B Ninh,12 
+BNinh,12 
+Bến Tre,32
+B Tre,32 
+BTre,32 
+Bình Định,21 
+B Định,21 
+BĐịnh,21 
+Bình Dương,280,281
+B Dương,280,281
+BDương,280,281
+Bình Phước,285
+B Phước,285
+BPhước,285
+Bình Thuận,26 
+B Thuận,26 
+BThuận,26 
+Cà Mau,38
+C Mau,38 
+CMau,38 
+Cần Thơ,36 
+C Thơ,36 
+CThơ,36 
+Cao Bằng,08 
+C Bằng,08 
+CBằng,08 
+Đà Nẵng,20
+TP Đà Nẵng,20
+T Phố Đà Nẵng,20
+Đ Nẵng,20
+ĐNẵng,20 
+Đắc Lắc,24
+Đ Lắc,24 
+ĐLắc,24 
+Đắk Lắk,24
+Đ Lắk,24
+ĐLắk,24
+Đăk Lăk,24
+Đ Lăk,24
+ĐLăk,24
+Đắc Nông,245
+Đắk Nông,245
+Đ Nông,245
+ĐNông,245
+Đăk Nông,245 
+Điện Biên,04 
+Đ Biên,04 
+ĐBiên,04 
+Đồng Nai,27 
+Đ Nai,27 
+ĐNai,27 
+Đồng Tháp,34 
+Đ Tháp,34 
+ĐTháp,34 
+Gia Lai,230,231
+G Lai,230,231
+GLai,230,231
+Hà Giang,07 
+Hà Nam,16 
+H Nam,16 
+HNam,16 
+Hà Tây,11
+H Tây,11
+HTây,11
+Hà Tĩnh,18 
+H Tĩnh,18 
+HTĩnh,18 
+Hải Dương,14 
+H Dương,14
+HDương,14 
+Hải Phòng,03 
+H Phòng,03 
+HPhòng,03 
+Hậu Giang,36 
+Hòa Bình,11 
+H Bình,11 
+HBình,11 
+Hưng Yên,14 
+H Yên,14 
+HYên,14 
+Khánh Hòa,22 
+K Hòa,22 
+KHòa,22 
+Kiên Giang,37 
+K Giang,37 
+KGiang,37 
+Kon Tum,23
+K Tum,23 
+KTum,23 
+Lai Châu,04 
+L Châu,04 
+LChâu,04 
+Lâm Đồng,25 
+L Đồng,25 
+L Đồng,25
+LĐồng,25 
+Lạng Sơn,08 
+L Sơn,08 
+LSơn,08 
+Lào Cai,06 
+L Cai,06 
+LCai,06 
+Long An,30 
+L An,30 
+LAn,30 
+Nam Định,16 
+N Định,16 
+NĐịnh,16 
+Nghệ An,18 
+N An,18 
+NAn,18 
+Ninh Bình,16 
+N Bình,16 
+NBình,16 
+Ninh Thuận,26 
+N Thuận,26 
+NThuận,26 
+Phú Thọ,13 
+P Thọ,13
+PThọ,13 
+Phú Yên,22 
+P Yên,22 
+PYên,22 
+Quảng Bình,19 
+Q Bình,19 
+QBình,19 
+Quảng Nam,20 
+Q Nam,20 
+QNam,20 
+Quảng Ngãi,21 
+Q Ngãi,21 
+QNgãi,21 
+Quảng Ninh,10 
+Q Ninh,10 
+QNinh,10 
+Quảng Trị,19 
+Q Trị,19 
+QTrị,19 
+Sóc Trăng,36 
+S Trăng,36 
+STrăng,36 
+Sơn La,05 
+S La,05 
+SLa,05 
+Tây Ninh,29 
+T Ninh,29 
+TNinh,29 
+Thái Bình,15 
+T Bình,15 
+TBình,15 
+Thái Nguyên,090,091
+T Nguyên,090,091
+TNguyên,090,091
+Thanh Hóa,17 
+T Hóa,17 
+THóa,17 
+Thừa Thiên Huế,19 
+T T Huế,19 
+TT Huế,19 
+TTHuế,19 
+Tiền Giang,31 
+T Giang,31 
+TGiang,31 
+Trà Vinh,33 
+T Vinh,33 
+TVinh,33 
+Tuyên Quang,07 
+T Quang,07 
+TQuang,07 
+Vĩnh Long,33
+V Long,33
+VLong,33 
+Vĩnh Phúc,13 
+V Phúc,13 
+VPhúc,13 
+Yên Bái,06
+Y Bái,06
+YBái,06
+

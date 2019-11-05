@@ -1,0 +1,90 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ftid-lb
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 5000
+  selector:
+    app: ftid
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: ftid
+spec:
+  replicas: 1
+  minReadySeconds: 15
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: ftid
+    spec:
+      volumes:
+        - name: export-models
+          hostPath:
+            # TODO: root path
+            path: "/home/vision.hiepph/ftid/export"
+        - name: serving-config
+          hostPath:
+            # TODO: root path
+            path: "/home/vision.hiepph/ftid/resources/configs/tensorflow"
+      containers:
+        - name: "api"
+          image: gcr.io/fti-vision/ftid-api:0.2.0
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5000
+          env:
+            - name: FTI_IDCARD_SERVING_NONE_HOST
+              value: "localhost:8500"
+            - name: FTI_IDCARD_SERVING_FIXED_HOST
+              value: "localhost:8501"
+            - name: FTI_IDCARD_WORKERS
+              value: "8"
+            - name: HOST_NAME
+              value: "$(HOSTNAME)"
+          resources:
+            requests:
+              cpu: "8"
+              memory: "4Gi"
+        - name: "serving-none"
+          image: tensorflow/serving:latest-devel
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8500
+          volumeMounts:
+            - name: export-models
+              mountPath: /share/export
+            - name: serving-config
+              mountPath: /share/config
+          resources:
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+          command: ["tensorflow_model_server"]
+          args: ["--model_config_file=/share/config/serving.config.none", "--enable_model_warmup=true"]
+        - name: "serving-fixed"
+          image: tensorflow/serving:latest-devel
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8501
+          volumeMounts:
+            - name: export-models
+              mountPath: /share/export
+            - name: serving-config
+              mountPath: /share/config
+          resources:
+            requests:
+              cpu: "4"
+              memory: "8Gi"
+          command: ["tensorflow_model_server"]
+          args: ["--port=8501", "--model_config_file=/share/config/serving.config.fixed", "--enable_batching=true", "--batching_parameters_file=/share/config/batching.config.fixed", "--enable_model_warmup=true"]
