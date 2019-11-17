@@ -12,7 +12,7 @@ async def feed(request, ws):
 		# get file
 		# handler - todo
 #		x = 0
-		for i in range(10):
+		for i in range(1000000000):
 			return_data = str(data)
 			await ws.send(return_data)
 
